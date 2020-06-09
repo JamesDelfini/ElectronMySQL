@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <title>ShoppingList</title>
+</head>
+<body>
+    <!-- <h1>ShoppingList</h1> -->
+    <nav>
+        <div class="nav-wrapper">
+            <a class="brand-logo center">Shopping List</a>
+        </div>
+    </nav>
+    <ul></ul>
+
+    <script>
+        const electron = require('electron');
+        const {ipcRenderer} = electron;
+        const ul = document.querySelector('ul');
+    
+        // Add item
+        ipcRenderer.on('item:add', function(e, item){
+            ul.className = 'collection'
+            const li = document.createElement('li');
+            li.className = 'collection-item';
+            li.id = item['id'];
+            const itemText = document.createTextNode(item['item']);
+            li.appendChild(itemText);
+            ul.appendChild(li);
+        });
+
+        // Clear items
+        ipcRenderer.on('item:clear', function (){
+            ul.innerHTML = '';
+            ul.className = '';
+        });
+
+        // Remove item
+        ul.addEventListener('dblclick', removeItem);
+
+        function removeItem(e){
+            // e.target.remove();
+            ipcRenderer.send('item:remove', e.target.id);
+
+            if(ul.children.length == 0){
+                ul.className = '';       
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded',pageLoaded);
+
+        function pageLoaded(){
+            ipcRenderer.send('item:load');
+        }
+    </script>
+</body>
+</html>
